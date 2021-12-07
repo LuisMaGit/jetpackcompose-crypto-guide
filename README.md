@@ -6,13 +6,13 @@ Basic cryptocurrency guide android app, with jetpack compose and clean architect
 * Data caching (In the first load cache more than 12k fields in the local db)
 * Data store (Saves theme)
 * Modular navigation (Navigation from the ViewModel)
-* Custom layout (Chips "Tags" from the details view)
+* Custom layout (Chips "Tags" in the details view)
 * Animations
 
 ### Dependecies:
 * Retrofit
 * SQLDelight
-* Data Store-Preferences
+* DataStore-Preferences
 * Compose Navigation
 * Dagger-Hilt
 * Coroutines/Flow
