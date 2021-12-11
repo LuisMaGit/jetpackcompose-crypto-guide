@@ -1,11 +1,13 @@
 package com.luisma.cryptocurrency.ui.views.themeWrapper
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.luisma.cryptocurrency.ui.theme.*
@@ -35,11 +37,12 @@ fun ThemeWrapper(
     model: ThemeWrapperViewModel = hiltViewModel(),
     content: @Composable () -> Unit,
 ) {
-    val colors = if (model.darkTheme.value) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+    val colors = when (model.isDarkTheme().collectAsState(initial = false).value) {
+        true -> DarkColorPalette
+        false -> LightColorPalette
+        else -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
     }
+
 
     MaterialTheme(
         colors = colors,

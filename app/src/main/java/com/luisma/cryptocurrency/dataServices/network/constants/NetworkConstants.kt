@@ -7,7 +7,7 @@ object NetworkConstants {
 
     object Routes {
         const val baseRoute = "https://api.coinpaprika.com/"
-        const val getCryptos = "/v1/coins"
+        const val getCryptos = "v1/coins/"
         const val getCryptosById = "$getCryptos/{${NetworkConstants.Paths.coinId}}"
     }
 }

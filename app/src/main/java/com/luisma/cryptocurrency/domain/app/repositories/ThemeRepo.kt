@@ -1,26 +1,33 @@
 package com.luisma.cryptocurrency.domain.app.repositories
 
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class AppThemes {
     Light,
-    Dark
+    Dark,
+    System
 }
 
 @Singleton
-class ThemeRepo @Inject constructor() {
+class ThemeRepo @Inject constructor(
+    private val prefRepo: PreferencesRepo,
+) {
 
-    private val _appThemeFlow = MutableSharedFlow<AppThemes>()
-    var appThemeFlow = _appThemeFlow.asSharedFlow()
-    private var _theme = AppThemes.Dark
-    fun theme():AppThemes = _theme
+    private fun theme() : Flow<String?> = prefRepo.read(DataStoreKey.Theme)
 
-    suspend fun setTheme(value: AppThemes){
-        _theme = value
-        _appThemeFlow.emit(_theme)
+    val isDarkMode = theme().map {
+        when (it) {
+            AppThemes.Light.toString() -> false
+            AppThemes.Dark.toString() -> true
+            else -> null
+        }
+    }
+
+    suspend fun setTheme(value: AppThemes) {
+        prefRepo.save(DataStoreKey.Theme, value.toString())
     }
 
 }

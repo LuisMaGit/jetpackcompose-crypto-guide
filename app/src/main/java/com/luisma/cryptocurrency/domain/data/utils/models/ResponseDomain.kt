@@ -1,10 +1,31 @@
 package com.luisma.cryptocurrency.domain.data.utils.models
 
+enum class ErrorType {
+    IO,
+    Http,
+    Unknow
+}
+
+
 sealed class ResponseDomain<Domain>(
     val domain: Domain?,
-    val message: String = ""
+    val errorType: ErrorType? = null,
+    val message: String = "",
 ) {
-    class Success<Domain>(domain: Domain) : ResponseDomain<Domain>(domain)
-    class Error<Nothing>(message: String) :
-        ResponseDomain<Nothing>(domain = null, message = message)
+    class Success<Domain>(
+        domain: Domain,
+        message: String? = null,
+    ) : ResponseDomain<Domain>(
+        domain,
+        message = message ?: ""
+    )
+
+    class Error<Domain>(
+        doamin: Domain? = null,
+        message: String,
+        errorType: ErrorType = ErrorType.Unknow,
+    ) : ResponseDomain<Domain>(
+        domain = doamin,
+        errorType = errorType,
+        message = message)
 }

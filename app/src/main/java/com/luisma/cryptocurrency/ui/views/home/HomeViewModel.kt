@@ -4,9 +4,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.luisma.cryptocurrency.domain.app.repositories.AppThemes
-import com.luisma.cryptocurrency.domain.app.repositories.NavigationService
+import com.luisma.cryptocurrency.domain.app.repositories.NavigationRepo
 import com.luisma.cryptocurrency.domain.app.repositories.ThemeRepo
 import com.luisma.cryptocurrency.domain.data.models.cryptoModels.Crypto
+import com.luisma.cryptocurrency.domain.data.models.cryptoModels.CryptoDomain
 import com.luisma.cryptocurrency.domain.data.repositories.cryptoRepo.ICryptoRepo
 import com.luisma.cryptocurrency.domain.data.utils.models.ResponseDomain
 import com.luisma.cryptocurrency.router.Routes
@@ -20,6 +21,7 @@ import javax.inject.Inject
 
 data class HomeDataState(
     val cryptos: List<Crypto>,
+    val lastUpdate: String,
     var filteredCryptos: List<Crypto> = listOf(),
 )
 
@@ -27,11 +29,15 @@ data class HomeDataState(
 class HomeViewModel @Inject constructor(
     private val cryptoRepo: ICryptoRepo,
     private val themeRepo: ThemeRepo,
-    private val navigationService: NavigationService,
+    private val navigationRepo: NavigationRepo,
 ) : BaseViewModel<HomeDataState>() {
 
     init {
-        fetchCryptos()
+        resolveCryptos(
+            fetchCallBack = {
+                cryptoRepo.getCyptos()
+            }
+        )
     }
 
     //STATES
@@ -40,6 +46,8 @@ class HomeViewModel @Inject constructor(
         return if (_searchValue.value.isEmpty()) _homeDataState.cryptos else _homeDataState.filteredCryptos
     }
 
+    fun getLastUpdate(): String = _homeDataState.lastUpdate
+
     private val _searchValue = mutableStateOf("")
     val searchValue: State<String> = _searchValue
     fun setSearch(search: String) {
@@ -47,9 +55,7 @@ class HomeViewModel @Inject constructor(
         findCrypto()
     }
 
-    private val _isDarkMode = mutableStateOf(themeRepo.theme() == AppThemes.Dark)
-    val isDarkMode: State<Boolean> = _isDarkMode
-
+    fun isDarkTheme() = themeRepo.isDarkMode
 
     private fun findCrypto() {
         val filtered = mutableListOf<Crypto>()
@@ -63,21 +69,36 @@ class HomeViewModel @Inject constructor(
         _homeDataState.filteredCryptos = filtered
     }
 
-    private fun fetchCryptos() = viewModelScope.launch(Dispatchers.IO) {
-        when (val result = cryptoRepo.getCyptos()) {
+    private fun resolveCryptos(
+        fetchCallBack: suspend () -> ResponseDomain<CryptoDomain>,
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        when (val result = fetchCallBack()) {
             is ResponseDomain.Success -> {
-                _homeDataState = HomeDataState(cryptos = result.domain!!)
-                setState(SimpleViewModelState.Iddle(_homeDataState))
+                setCryptos(result.domain?.cryptos, result.domain?.lastUpdate)
             }
             is ResponseDomain.Error -> {
+
+                if (result.domain != null) {
+                    setCryptos(
+                        result.domain.cryptos,
+                        result.domain.lastUpdate
+                    )
+                    return@launch
+                }
+
                 setState(SimpleViewModelState.Error(result.message))
             }
         }
     }
 
-    fun changeTheme() {
-        _isDarkMode.value = !_isDarkMode.value
-        if (!_isDarkMode.value) {
+    private fun setCryptos(cryptos: List<Crypto>?, lastUpdate: String?) {
+        _homeDataState = HomeDataState(cryptos!!, lastUpdate ?: "")
+        setState(SimpleViewModelState.Iddle(_homeDataState))
+    }
+
+
+    fun setDarkMode(darkMode: Boolean) {
+        if (darkMode) {
             viewModelScope.launch {
                 themeRepo.setTheme(AppThemes.Light)
             }
@@ -91,7 +112,7 @@ class HomeViewModel @Inject constructor(
 
     fun goToDetails(cryptoId: String) {
         viewModelScope.launch {
-            navigationService.goTo(
+            navigationRepo.goTo(
                 Routes.CryptoDetails.goToCrypto(cryptoId)
             )
         }
@@ -99,6 +120,19 @@ class HomeViewModel @Inject constructor(
 
     fun tryAgain() {
         setState(SimpleViewModelState.Loading())
-        fetchCryptos()
+        resolveCryptos(
+            fetchCallBack = {
+                cryptoRepo.getCyptos()
+            }
+        )
+    }
+
+    fun onTapRefresh() {
+        setState(SimpleViewModelState.Loading())
+        resolveCryptos(
+            fetchCallBack = {
+                cryptoRepo.fetchAndCacheCryptos()
+            }
+        )
     }
 }

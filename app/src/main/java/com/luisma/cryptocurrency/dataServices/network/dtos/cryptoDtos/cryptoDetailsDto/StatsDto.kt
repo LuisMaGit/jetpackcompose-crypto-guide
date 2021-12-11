@@ -1,9 +1,9 @@
-package com.luisma.cryptocurrency.dataServices.network.entities.cryptoEntities.cryptoDetailsEntity
+package com.luisma.cryptocurrency.dataServices.network.dtos.cryptoDtos.cryptoDetailsDto
 
 
 import com.google.gson.annotations.SerializedName
 
-data class StatsEntity(
+data class StatsDto(
     @SerializedName("contributors")
     val contributors: Int,
     @SerializedName("followers")

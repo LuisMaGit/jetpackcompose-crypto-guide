@@ -1,9 +1,9 @@
-package com.luisma.cryptocurrency.dataServices.network.entities.cryptoEntities.cryptoDetailsEntity
+package com.luisma.cryptocurrency.dataServices.network.dtos.cryptoDtos.cryptoDetailsDto
 
 
 import com.google.gson.annotations.SerializedName
 
-data class CryptoDetailsEntity(
+data class CryptoDetailsDto(
     @SerializedName("id")
     val id: String,
 
@@ -26,11 +26,11 @@ data class CryptoDetailsEntity(
     val type: String,
 
     @SerializedName("tags")
-    val tags: List<TagEntity>,
+    val tags: List<TagDto>,
 
 
     @SerializedName("team")
-    val team: List<TeamEntity>,
+    val team: List<TeamDto>,
 
     @SerializedName("description")
     val description: String,
@@ -60,13 +60,13 @@ data class CryptoDetailsEntity(
     val hashAlgorithm: String,
 
     @SerializedName("links")
-    val links: LinksEntity,
+    val links: LinksDto,
 
     @SerializedName("links_extended")
-    val linksExtended: List<LinksExtendedEntity>,
+    val linksExtended: List<LinksExtendedDto>,
 
     @SerializedName("whitepaper")
-    val whitepaper: WhitepaperEntity,
+    val whitepaper: WhitepaperDto,
 
     @SerializedName("first_data_at")
     val firstDataAt: String,

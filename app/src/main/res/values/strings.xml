@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Cryptocurrency</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="home_last_update">"Last update: "</string>
+    <string name="home_refresh_button">Refresh</string>
+    <string name="home_hint_search_bar">Search crypto...</string>
+    <string name="components_active_sign">active</string>
+    <string name="components_inactive_sign">inactive</string>
+    <string name="details_tags">Tags</string>
+    <string name="details_team_members">Team members</string>
 </resources>

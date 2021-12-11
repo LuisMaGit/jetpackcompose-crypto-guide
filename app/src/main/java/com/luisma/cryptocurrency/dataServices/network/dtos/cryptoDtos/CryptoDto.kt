@@ -1,10 +1,10 @@
-package com.luisma.cryptocurrency.dataServices.network.entities.cryptoEntities
+package com.luisma.cryptocurrency.dataServices.network.dtos.cryptoDtos
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 
-data class CryptoEntity(
+data class CryptoDto(
     @SerializedName("id")
     @Expose
     val id: String,

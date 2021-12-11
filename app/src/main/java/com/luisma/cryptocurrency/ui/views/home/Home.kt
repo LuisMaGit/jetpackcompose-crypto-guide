@@ -1,16 +1,15 @@
 package com.luisma.cryptocurrency.ui.views.home
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,6 +18,7 @@ import com.luisma.cryptocurrency.ui.components.CenterLoader
 import com.luisma.cryptocurrency.ui.components.ErrorScreen
 import com.luisma.cryptocurrency.ui.components.FractionallyPageWrapper
 import com.luisma.cryptocurrency.ui.views.themeWrapper.ThemeWrapper
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -51,6 +51,8 @@ fun HomeIddle(
             easing = LinearOutSlowInEasing
         )
     )
+    val isDarkMode = model.isDarkTheme().collectAsState(initial = false).value ?: false
+
 
     fun goUp() {
         coroutineScroll.launch {
@@ -68,6 +70,7 @@ fun HomeIddle(
             }
         }
     }
+
     //View
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -80,14 +83,18 @@ fun HomeIddle(
                 setSearch = {
                     model.setSearch(it)
                 },
+                lastUpdate = model.getLastUpdate(),
+                onTapRefresh = {
+                    model.onTapRefresh()
+                },
                 stateList = lazyListState,
                 showFloatingButton = {
                     showFloatingButton(it)
                 },
                 cryptos = model.getCryptos(),
-                isDarkMode = model.isDarkMode.value,
-                changeTheme = {
-                    model.changeTheme()
+                isDarkMode = isDarkMode,
+                setDarkMode = {
+                    model.setDarkMode(it)
                 },
                 goToDetails = {
                     model.goToDetails(it)

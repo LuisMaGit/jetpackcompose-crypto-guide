@@ -1,30 +1,77 @@
 package com.luisma.cryptocurrency.domain.data.repositories.cryptoRepo
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
+import com.luisma.cryptocurrency.dataServices.internal.source.ICryptoLocal
 import com.luisma.cryptocurrency.domain.data.utils.models.ResponseDomain
 import com.luisma.cryptocurrency.dataServices.network.api.ICryptoApi
-import com.luisma.cryptocurrency.dataServices.network.entities.cryptoEntities.cryptoDetailsEntity.CryptoDetailsEntity
 import com.luisma.cryptocurrency.domain.data.mappers.CryptoDetailsMapper
 import com.luisma.cryptocurrency.domain.data.mappers.CryptoMapper
-import com.luisma.cryptocurrency.domain.data.models.cryptoModels.Crypto
+import com.luisma.cryptocurrency.domain.data.models.cryptoModels.CryptoDomain
 import com.luisma.cryptocurrency.domain.data.models.cryptoModels.cryptoDetails.CryptoDetails
 import com.luisma.cryptocurrency.domain.data.utils.helpers.SimpleResponseHandler
+import com.luisma.cryptocurrency.domain.data.utils.helpers.parseDateTime
+import java.time.LocalDateTime
 
 class CryptoRepo constructor(
     private val cryptoApi: ICryptoApi,
+    private val cryptoLocal: ICryptoLocal,
     private val cryptoMapper: CryptoMapper,
-    private val cyptoDetailsMapper: CryptoDetailsMapper,
+    private val cryptoDetailsMapper: CryptoDetailsMapper,
     private val simpleResponseHandler: SimpleResponseHandler,
 ) : ICryptoRepo {
-    override suspend fun getCyptos(): ResponseDomain<List<Crypto>> {
-        return simpleResponseHandler.handleResponse(
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun fetchAndCacheCryptos(): ResponseDomain<CryptoDomain>{
+        val response = simpleResponseHandler.handleResponseWithCache(
             call = {
                 cryptoApi.getCoins()
             },
-            mapper = {
-                cryptoMapper.mapEntitiesToDomains(it)
+            mapDtoToEntity = {
+                cryptoMapper.mapDtosToEntities(it)
             },
-            tag = "Cryptos"
+            saveDb = {
+                cryptoLocal.insertCryptos(it)
+            },
+            getDb = {
+                cryptoLocal.getCryptos()
+            },
+            mapEntityToDomain = {
+                cryptoMapper.mapEntitiesToDomain(it)
+            },
+            errorTag = "Cryptos"
         )
+
+        val lastUpdate = cryptoLocal.insertLastUpdateCrypto(
+            parseDateTime(LocalDateTime.now())
+        )
+        return ResponseDomain.Success(
+            domain = CryptoDomain(
+                cryptos = response.domain ?: listOf(),
+                lastUpdate = lastUpdate
+            )
+        )
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    override suspend fun getCyptos(): ResponseDomain<CryptoDomain> {
+        //USING DB CRYPTOS
+        val storedCryptosEntity = cryptoLocal.getCryptos()
+        if (storedCryptosEntity.isNotEmpty()) {
+            val lastUpdate = cryptoLocal.getLastUpdateCryptos()
+            val storedCryptosDomain = cryptoMapper.mapEntitiesToDomain(storedCryptosEntity)
+            return ResponseDomain.Success(
+                domain = CryptoDomain(
+                    cryptos = storedCryptosDomain,
+                    lastUpdate = lastUpdate
+                )
+            )
+        }
+
+        //FETCHING AND CACHING
+        return fetchAndCacheCryptos()
     }
 
     override suspend fun getCryptoById(id: String): ResponseDomain<CryptoDetails> {
@@ -33,9 +80,9 @@ class CryptoRepo constructor(
                 cryptoApi.getCoinById(id)
             },
             mapper = {
-                cyptoDetailsMapper.mapEntityToDomain(it)
+                cryptoDetailsMapper.mapSourceToDomain(it)
             },
-            tag = "Crypto Details"
+            errorTag = "Crypto Details"
         )
     }
 }

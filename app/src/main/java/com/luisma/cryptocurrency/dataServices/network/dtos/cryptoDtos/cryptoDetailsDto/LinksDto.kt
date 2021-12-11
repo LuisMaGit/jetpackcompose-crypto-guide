@@ -1,9 +1,9 @@
-package com.luisma.cryptocurrency.dataServices.network.entities.cryptoEntities.cryptoDetailsEntity
+package com.luisma.cryptocurrency.dataServices.network.dtos.cryptoDtos.cryptoDetailsDto
 
 
 import com.google.gson.annotations.SerializedName
 
-data class LinksEntity(
+data class LinksDto(
     @SerializedName("explorer")
     val explorer: List<String>,
     @SerializedName("facebook")

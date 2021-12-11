@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NavigationService @Inject constructor() {
+class NavigationRepo @Inject constructor() {
 
     private val _commands = MutableSharedFlow<INavigationCommand>()
     var commands = _commands.asSharedFlow()

@@ -1,9 +1,9 @@
-package com.luisma.cryptocurrency.dataServices.network.entities.cryptoEntities.cryptoDetailsEntity
+package com.luisma.cryptocurrency.dataServices.network.dtos.cryptoDtos.cryptoDetailsDto
 
 
 import com.google.gson.annotations.SerializedName
 
-data class WhitepaperEntity(
+data class WhitepaperDto(
     @SerializedName("link")
     val link: String,
     @SerializedName("thumbnail")

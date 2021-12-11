@@ -1,0 +1,33 @@
+CREATE TABLE CryptoEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    isActive INTEGER NOT NULL,
+    isNew INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    rank INTEGER NOT NULL,
+    symbol TEXT NOT NULL,
+    type TEXT NOT NULL
+);
+
+getCryptos:
+SELECT *
+FROM CryptoEntity;
+
+insertCrypto:
+INSERT OR REPLACE INTO CryptoEntity(id, isActive, isNew, name, rank, symbol, type)
+VALUES ?;
+
+deleteCryptoById:
+DELETE FROM CryptoEntity WHERE id = :id;
+
+CREATE TABLE CryptoEntityUtil(
+    lastUpdate TEXT NOT NULL
+);
+
+getCryptoLastUpdate:
+SELECT lastUpdate
+FROM CryptoEntityUtil ORDER BY lastUpdate DESC LIMIT 1;
+
+insertLastUpdate:
+INSERT OR REPLACE INTO CryptoEntityUtil(lastUpdate)
+VALUES (?);
+

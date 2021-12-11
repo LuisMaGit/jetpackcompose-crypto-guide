@@ -24,15 +24,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.luisma.cryptocurrency.R
 import com.luisma.cryptocurrency.domain.data.models.cryptoModels.Crypto
 import com.luisma.cryptocurrency.ui.components.ActiveSign
 import com.luisma.cryptocurrency.ui.components.AppText
-import com.luisma.cryptocurrency.ui.components.ReducedBy
 import com.luisma.cryptocurrency.ui.theme.Constants
 import com.luisma.cryptocurrency.ui.theme.White
 
@@ -41,11 +45,13 @@ import com.luisma.cryptocurrency.ui.theme.White
 fun HomeBody(
     search: String,
     setSearch: (value: String) -> Unit,
+    lastUpdate: String,
+    onTapRefresh: () -> Unit,
     stateList: LazyListState,
     showFloatingButton: (value: Int) -> Unit,
     cryptos: List<Crypto>,
     isDarkMode: Boolean,
-    changeTheme: () -> Unit,
+    setDarkMode: (darkMode: Boolean) -> Unit,
     goToDetails: (cryptoId: String) -> Unit,
 ) {
     Column {
@@ -67,7 +73,45 @@ fun HomeBody(
             //Actions
             ThemeButton(
                 isDarkMode = isDarkMode,
-                changeTheme = changeTheme,
+                setDarkMode = setDarkMode,
+            )
+        }
+        //LastUpdate
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            //Date
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = MaterialTheme.colors.secondary,
+                            fontFamily = MaterialTheme.typography.body1.fontFamily,
+                            fontWeight = MaterialTheme.typography.body1.fontWeight,
+                            fontSize = MaterialTheme.typography.body1.fontSize,
+                        )
+                    ) {
+                        append(stringResource(id = R.string.home_last_update))
+                    }
+                    append(lastUpdate)
+                },
+                color = MaterialTheme.colors.onSecondary,
+                fontFamily = MaterialTheme.typography.caption.fontFamily,
+                fontWeight = MaterialTheme.typography.caption.fontWeight,
+                fontSize = MaterialTheme.typography.caption.fontSize,
+            )
+            //Refresh
+            AppText.B2(
+                stringResource(id = R.string.home_refresh_button),
+                color = MaterialTheme.colors.primary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.clickable {
+                    onTapRefresh()
+                }
             )
         }
         //List
@@ -197,7 +241,7 @@ private fun SearchTextField(
                 if (value.isEmpty()) {
                     WrapperField {
                         AppText.B1(
-                            "Buscar cripto...",
+                            stringResource(id = R.string.home_hint_search_bar),
                             color = MaterialTheme.colors.onSecondary
                         )
                     }
@@ -241,15 +285,15 @@ private fun WrapperField(
 @Composable
 private fun ThemeButton(
     isDarkMode: Boolean,
-    changeTheme: () -> Unit,
+    setDarkMode: (darkMode: Boolean) -> Unit,
 ) {
     if (isDarkMode) {
         ButtonIcon(R.drawable.ic_baseline_nights_stay_24) {
-            changeTheme()
+            setDarkMode(isDarkMode)
         }
     } else {
         ButtonIcon(R.drawable.ic_baseline_wb_sunny_24) {
-            changeTheme()
+            setDarkMode(isDarkMode)
         }
     }
 }
