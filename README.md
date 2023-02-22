@@ -1,5 +1,5 @@
 # Jetpack-Compose-CryptoGuide
-Basic cryptocurrency guide android app, with jetpack compose and clean architecture
+Basic cryptocurrency guide android app
 
 ### Features:
 * The project follows a clean architecture approach, MVVM pattern and Jetpack Compose UI
